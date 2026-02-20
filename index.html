@@ -3,100 +3,1036 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moana Life - Ürün Kataloğu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>İnfazMatik Pro Elite - Güvenli Erişim</title>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            scroll-behavior: smooth;
+        :root {
+            --primary: #0f172a;
+            --secondary: #334155;
+            --accent: #2563eb;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --purple: #7c3aed;
+            --light: #f1f5f9;
+            --border: #e2e8f0;
+            --radius: 12px;
         }
-        .catalog-container {
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            height: 100vh;
+
+        /* METİN SEÇİMİ (KOPYALAMA) ENGELİ */
+        * { box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { 
+            background-color: #f8fafc; color: var(--primary); margin: 0; padding: 20px; line-height: 1.6;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
         }
-        .catalog-page {
-            scroll-snap-align: start;
-            flex-shrink: 0;
-            height: 100vh;
-            width: 100%;
+        
+        /* Girdi alanlarında ve dilekçede metin seçimine izin ver */
+        input, select, textarea, [contenteditable="true"] {
+            -webkit-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* ŞİFRE EKRANI (AUTH OVERLAY) STİLLERİ */
+        #authOverlay {
+            position: fixed; inset: 0; background: #0f172a; z-index: 99999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+        #authOverlay.hidden { display: none; }
+        .auth-box { background: #1e293b; padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 90%; max-width: 400px; }
+        .auth-input { padding: 15px; font-size: 1.2rem; border-radius: 8px; border: none; margin: 20px 0; text-align: center; width: 100%; box-sizing: border-box; outline: none; }
+        .auth-input:focus { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3); }
+        .auth-btn { background: var(--accent); color: white; border: none; padding: 15px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        .auth-btn:hover { background: #1d4ed8; }
+        .error-msg { color: #ef4444; margin-top: 15px; display: none; font-weight: bold; }
+
+        /* STANDART ARAYÜZ STİLLERİ */
+        .main-ui { display: block; filter: blur(10px); pointer-events: none; transition: filter 0.3s; }
+        .main-ui.unlocked { filter: blur(0); pointer-events: auto; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 35px; border-radius: var(--radius); box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+        
+        header { border-bottom: 2px solid var(--light); margin-bottom: 30px; padding-bottom: 15px; }
+        header h1 { margin: 0; color: var(--primary); font-size: 1.9rem; letter-spacing: -1px; }
+        header p { margin: 5px 0 0; font-size: 0.95rem; color: #64748b; }
+
+        .progress-container { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; max-width: 850px; margin-left: auto; margin-right: auto; }
+        .progress-line { position: absolute; top: 50%; left: 0; height: 3px; background: var(--light); width: 100%; z-index: 1; transform: translateY(-50%); }
+        .step-bubble { z-index: 2; width: 45px; height: 45px; background: #fff; border: 3px solid var(--light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; transition: 0.4s; color: #94a3b8; font-size: 1.1rem; }
+        .step-bubble.active { border-color: var(--accent); color: var(--accent); transform: scale(1.1); box-shadow: 0 0 20px rgba(37, 99, 235, 0.2); }
+        .step-bubble.completed { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .step-panel { display: none; }
+        .step-panel.active { display: block; animation: slideIn 0.35s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: 700; margin-bottom: 8px; font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; }
+        input, select, textarea { padding: 12px; border: 2px solid var(--border); border-radius: 10px; outline: none; font-size: 1rem; transition: 0.2s; background: #fff; }
+        textarea { resize: vertical; min-height: 80px; font-family: 'Inter', sans-serif; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; background: #f8fafc; padding: 25px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .checkbox-section-title { grid-column: 1 / -1; font-weight: 900; color: var(--primary); margin-top: 15px; margin-bottom: 5px; font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 5px; }
+        .checkbox-item { display: flex; align-items: flex-start; cursor: pointer; font-size: 0.95rem; padding: 12px; border-radius: 8px; transition: 0.2s; border: 1px solid var(--border); background: #fff; }
+        .checkbox-item:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .checkbox-item input { margin-top: 4px; margin-right: 15px; width: 22px; height: 22px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+        .mahsup-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end; margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 10px; border: 1px dashed var(--border); }
+        .btn-remove { background: #fee2e2; color: #ef4444; border: none; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.3rem; }
+        
+        .nav-btns { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 25px; border-top: 2px solid var(--light); }
+        .btn { padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; transition: 0.3s; font-size: 1rem; }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .btn-secondary { background: #f1f5f9; color: var(--secondary); }
+        .btn-success { background: var(--success); color: #fff; margin-top: 15px; width: 100%; text-align: center; }
+        .btn-success:hover { background: #15803d; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .tabs { display: flex; gap: 15px; border-bottom: 2px solid var(--light); margin-bottom: 30px; }
+        .tab-btn { padding: 14px 28px; cursor: pointer; border: none; background: none; font-weight: 800; color: #94a3b8; border-bottom: 4px solid transparent; transition: 0.3s; font-size: 1rem; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .result-card { background: #fff; border: 2px solid var(--border); border-top-width: 6px; padding: 25px; border-radius: var(--radius); position: relative; }
+        .result-card.danger { border-top-color: var(--danger); }
+        .result-card.warning { border-top-color: var(--warning); }
+        .result-card.success { border-top-color: var(--success); }
+        .result-card.primary { border-top-color: var(--primary); }
+        
+        .result-val { font-size: 1.7rem; font-weight: 900; color: var(--primary); margin-top: 8px; }
+        .result-sub { font-size: 0.85rem; color: #64748b; margin-top: 5px; font-weight: 600; }
+        .result-label { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #475569; }
+
+        .option-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .option-card { border: 2px solid var(--border); border-radius: var(--radius); padding: 25px; background: #fff; position: relative; transition: 0.3s; }
+        .option-card.eligible { border-left: 10px solid var(--success); box-shadow: 0 8px 20px rgba(22, 163, 74, 0.1); }
+        .option-card.not-eligible { border-left: 10px solid #cbd5e1; opacity: 0.8; background: #fcfcfc; }
+        .badge { position: absolute; top: 20px; right: 20px; padding: 8px 16px; border-radius: 30px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #f1f5f9; color: #475569; }
+
+        .info-box { font-size: 0.95rem; background: #eff6ff; border-radius: 10px; padding: 25px; margin-top: 25px; color: #1e40af; border: 1px solid #bfdbfe; }
+        .info-box ul { margin: 15px 0 0 25px; padding: 0; }
+        .info-box li { margin-bottom: 10px; }
+        .auth-tag { display: inline-flex; align-items: center; background: #f1f5f9; color: #475569; font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; margin-top: 12px; font-weight: 800; border: 1px solid #cbd5e1; }
+        
+        /* Modal & Print */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        .modal-content { background: #fff; width: 95%; max-width: 700px; padding: 30px; border-radius: var(--radius); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--light); padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 1.4rem; color: var(--primary); }
+        .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+        
+        .print-area { display: none; background: #e2e8f0; min-height: 100vh; padding: 20px 0; }
+        .print-toolbar { background: var(--primary); padding: 15px; text-align: center; margin: 0 auto 20px auto; border-radius: 8px; max-width: 800px; display: flex; justify-content: center; gap: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .print-document { background: #fff; padding: 20mm; font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.5; font-size: 12pt; max-width: 800px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: box-shadow 0.3s; }
+        .print-document:focus { outline: none; box-shadow: 0 0 0 2px var(--success), 0 10px 30px rgba(0,0,0,0.15); }
+        .print-header { text-align: center; font-weight: bold; font-size: 14pt; margin-bottom: 30px; text-transform: uppercase; }
+        .print-row { display: flex; margin-bottom: 10px; }
+        .print-label { width: 150px; font-weight: bold; }
+        .print-content { flex: 1; }
+        .print-body { margin-top: 30px; text-align: justify; }
+        .print-footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .print-sign { text-align: center; width: 250px; }
+        .print-attachments { margin-top: 40px; font-size: 11pt; }
+        .editable-hint { text-align: center; color: var(--accent); font-weight: bold; margin-bottom: 10px; background: #eff6ff; padding: 10px; border-radius: 8px; max-width: 800px; margin-left: auto; margin-right: auto; }
+
+        @media print {
+            body { background: #fff; padding: 0; margin: 0; }
+            .main-ui, .modal-overlay, .print-toolbar, .editable-hint { display: none !important; }
+            .print-area { display: block !important; background: #fff; padding: 0; }
+            .print-document { padding: 0; box-shadow: none !important; max-width: 100%; margin: 0; border: none !important; }
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div class="catalog-container">
-
-        <!-- Sayfa 1: Ana Giriş ve Seçim Ekranı -->
-        <section id="page1" class="catalog-page relative flex flex-col items-center justify-center bg-cover bg-center text-white p-8" style="background-image: url('kapak.png');">
-            <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-            <div class="relative z-10 text-center max-w-3xl">
-                <h1 class="text-5xl md:text-7xl font-bold mb-2 drop-shadow-lg">MOANA LIFE</h1>
-                <p class="text-xl md:text-2xl font-light mb-6 drop-shadow-md">Ananasın Gücüyle Tanışın</p>
-                
-                <div class="bg-black bg-opacity-20 backdrop-blur-sm p-4 rounded-lg mb-8">
-                    <p class="text-lg font-light">
-                        Moana Life, ananasın doğal bromelain enzimi mucizesini temel alan bir sağlık şurubudur. Vücudunuzdaki şişkinlik ve ödemle savaşır, sindiriminizi kolaylaştırır ve bağışıklık sisteminize destek olur. Kendinizi daha hafif, daha enerjik ve dengede hissetmeniz için tasarlandı.
-                    </p>
-                </div>
-
-                <h2 class="text-2xl font-semibold mb-6">Şimdi hedefinize özel ek faydayı ve lezzeti seçin:</h2>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="#page2" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">Moringa</a>
-                    <a href="#page3" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">Zencefil</a>
-                    <a href="#page4" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">Matcha</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Sayfa 2: Ananas & Moringa Versiyonu -->
-        <section id="page2" class="catalog-page flex flex-col md:flex-row items-center justify-center bg-emerald-50">
-            <div class="w-full md:w-1/2 h-1/2 md:h-full">
-                <!-- Bu bölüm için görseli 'ananas-moringa.png' olarak kaydedin -->
-                <img src="ananas-moringa.png" alt="Ananas ve Moringa" class="object-contain w-full h-full">
-            </div>
-            <div class="w-full md:w-1/2 p-8 md:p-16 text-center md:text-left relative">
-                <h2 class="text-4xl md:text-5xl font-bold text-emerald-800 mb-4">Doğanın Vitamini: Moringa</h2>
-                <p class="text-lg text-emerald-700 mb-6">
-                    Enerjinizi tazeleyin, arının ve parlayın! Moringa'nın besleyici gücü, ananasın tropikal ferahlığıyla birleşti. Vücudunuza ihtiyaç duyduğu vitamin ve mineralleri sunarken, toksinlerden arınmanıza yardımcı olur. Her yudumda canlılığı hissedin!
-                </p>
-                <a href="#page1" class="text-emerald-600 font-semibold hover:underline">← Ana Sayfaya Dön</a>
-            </div>
-        </section>
-
-        <!-- Sayfa 3: Ananas & Zencefil Versiyonu -->
-        <section id="page3" class="catalog-page flex flex-col-reverse md:flex-row items-center justify-center bg-amber-50">
-            <div class="w-full md:w-1/2 p-8 md:p-16 text-center md:text-left relative">
-                <h2 class="text-4xl md:text-5xl font-bold text-amber-800 mb-4">Metabolizma Ateşi: Zencefil</h2>
-                <p class="text-lg text-amber-700 mb-6">
-                    İçinizi ısıtacak bir güç! Zencefilin canlandırıcı etkisi, ananasın tatlılığıyla mükemmel bir denge kuruyor. Metabolizmanızı harekete geçirin, sindiriminizi destekleyin ve gün boyu enerjik kalın. Fazlalıklara karşı en lezzetli savaşçınız!
-                </p>
-                <a href="#page1" class="text-amber-600 font-semibold hover:underline">← Ana Sayfaya Dön</a>
-            </div>
-            <div class="w-full md:w-1/2 h-1/2 md:h-full">
-                <!-- Bu bölüm için görseli 'ananas-zencefil.png' olarak kaydedin -->
-                <img src="ananas-zencefil.png" alt="Ananas ve Zencefil" class="object-contain w-full h-full">
-            </div>
-        </section>
-
-        <!-- Sayfa 4: Ananas & Matcha Versiyonu -->
-        <section id="page4" class="catalog-page flex flex-col md:flex-row items-center justify-center bg-teal-50">
-            <div class="w-full md:w-1/2 h-1/2 md:h-full">
-                <!-- Bu bölüm için görseli 'ananas-matcha.png' olarak kaydedin -->
-                <img src="ananas-matcha.png" alt="Ananas ve Matcha" class="object-contain w-full h-full">
-            </div>
-            <div class="w-full md:w-1/2 p-8 md:p-16 text-center md:text-left relative">
-                 <h2 class="text-4xl md:text-5xl font-bold text-teal-800 mb-4">Odaklan ve Arın: Matcha</h2>
-                <p class="text-lg text-teal-700 mb-6">
-                    Sakin bir enerji dalgasıyla tanışın. Matcha'nın antioksidan zenginliği ve odaklanmayı artıran gücü, ananasın ferahlığıyla buluştu. Zihinsel berraklık kazanırken vücudunuzu serbest radikallere karşı koruyun. Günün stresine karşı yeşil kalkanınız!
-                </p>
-                 <a href="#page1" class="text-teal-600 font-semibold hover:underline">← Ana Sayfaya Dön</a>
-            </div>
-        </section>
+<!-- GÜVENLİK DUVARI (AUTH OVERLAY) -->
+<div id="authOverlay">
+    <div class="auth-box">
+        <h2 style="margin-top:0;">İnfazMatik Pro Elite</h2>
+        <p style="color: #94a3b8;">Sistem kilitlidir. Lütfen yetkili erişim şifresini girin.</p>
+        <input type="password" id="authPassword" class="auth-input" placeholder="Erişim Şifresi" onkeypress="if(event.key === 'Enter') SecurityApp.checkAuth()">
+        <button class="auth-btn" onclick="SecurityApp.checkAuth()">Kilidi Aç</button>
+        <div id="authError" class="error-msg">Hatalı Şifre! Erişim Reddedildi.</div>
     </div>
+</div>
+
+<div class="main-ui" id="mainUi">
+    <div class="container">
+        <header>
+            <h1>İnfazMatik Pro Elite</h1>
+            <p>5275 S.K. m.107 ve m.108 Uyumlu Çekirdek - Çocuk İstisnaları ve Tavan Kontrolü</p>
+        </header>
+
+        <div class="progress-container">
+            <div class="progress-line"></div>
+            <div class="step-bubble active" data-step="1">1</div>
+            <div class="step-bubble" data-step="2">2</div>
+            <div class="step-bubble" data-step="3">3</div>
+            <div class="step-bubble" data-step="4">4</div>
+            <div class="step-bubble" data-step="5">5</div>
+        </div>
+
+        <form id="infazForm" onsubmit="return false;">
+            <!-- STEP 1: Ceza Bilgileri -->
+            <div class="step-panel active" id="panel1">
+                <h3>Adım 1: Karar ve Süre Bilgileri</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Hapis Türü</label>
+                        <select id="sentenceType">
+                            <option value="sureli">Süreli Hapis</option>
+                            <option value="muebbet">Müebbet Hapis</option>
+                            <option value="agirlastirilmis">Ağırlaştırılmış Müebbet</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Ceza (Yıl)</label><input type="number" id="valY" min="0" value="0"></div>
+                    <div class="form-group"><label>Ay</label><input type="number" id="valM" min="0" value="0"></div>
+                    <div class="form-group"><label>Gün</label><input type="number" id="valD" min="0" value="0"></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Suçun İşleniş Biçimi</label>
+                        <select id="crimeIntent">
+                            <option value="intentional">Kasten İşlenen Suç</option>
+                            <option value="negligent">Taksirle İşlenen Suç (m.85 Hariç)</option>
+                            <option value="negligentHomicide">Taksirle Öldürme (m.85 vb.)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Suç Tarihi</label><input type="date" id="crimeDate"></div>
+                    <div class="form-group">
+                        <label>İnfaza Başlama (Cezaevi Giriş)</label>
+                        <input type="date" id="entryDate">
+                    </div>
+                </div>
+                <div class="checkbox-group" style="grid-template-columns: 1fr; margin-top: 15px;">
+                    <label class="checkbox-item" style="border-color: var(--accent); background: #eff6ff;">
+                        <input type="checkbox" id="crime_multiple"> 
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="color: var(--accent); font-weight: bold;">Cezalar Birden Fazla Dosyanın Toplamı (İçtima) Mı?</span>
+                            <span style="color: #64748b; font-size: 0.8rem;">İşaretlenirse Kanundaki 28 ve 32 Yıllık Maksimum İnfaz Sınırları (m.107/3-4) Devreye Girer.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- STEP 2: Şahsi Haller & Tekerrür -->
+            <div class="step-panel" id="panel2">
+                <h3>Adım 2: Hükümlü ve İnfaz Şartları</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Doğum Tarihi</label><input type="date" id="birthDate"></div>
+                    <div class="form-group">
+                        <label>Tekerrür Durumu</label>
+                        <select id="recidivism">
+                            <option value="none">Yok</option>
+                            <option value="once">Birinci Kez Mükerrer (m.108/1 - 2/3)</option>
+                            <option value="twice">İkinci Kez Mükerrer (m.108/3 - 3/4)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="priorSentenceGroup" style="display: none; border-left: 3px solid var(--warning); padding-left: 10px; margin-top: 10px; flex-direction: column;">
+                        <label style="color: var(--warning);">Tekerrüre Esas Ceza (Önceki Ceza)</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="number" id="priorY" min="0" value="0" placeholder="Y" style="width: 33%;">
+                            <input type="number" id="priorM" min="0" value="0" placeholder="A" style="width: 33%;">
+                            <input type="number" id="priorD" min="0" value="0" placeholder="G" style="width: 33%;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cinsiyet</label>
+                        <select id="gender">
+                            <option value="male">Erkek</option>
+                            <option value="female">Kadın</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" id="isPregnant"> <div>Gebe (Hamile)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="gaveBirth"> <div>Doğum Yaptı (Yakın Zaman)</div></label>
+                    <div id="birthDateGroup" style="display:none; padding-left:20px; width:100%; grid-column: 1 / -1;">
+                        <label>Çocuğun Doğum Tarihi:</label><input type="date" id="childBirthDate">
+                    </div>
+                    
+                    <label class="checkbox-item"><input type="checkbox" id="hasSevereIllness"> <div>Ağır Hastalık / Engellilik (Raporlu)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="calledBySummons"> <div>Davetiye (Çağrı) Üzerine Kendi Teslim Oldu</div></label>
+                </div>
+            </div>
+
+            <!-- STEP 3: Mahsup -->
+            <div class="step-panel" id="panel3">
+                <h3>Adım 3: Mahsup (Gözaltı / Tutukluluk)</h3>
+                <div id="mahsupContainer"></div>
+                <button type="button" class="btn btn-secondary" id="btnAddMahsup">+ Yeni Süre Ekle</button>
+                <div class="info-box" id="mahsupSummary">Toplam Mahsup: 0 Gün</div>
+            </div>
+
+            <!-- STEP 4: YENİ MİMARİ - Suç Sınıflandırması -->
+            <div class="step-panel" id="panel4">
+                <h3>Adım 4: Suç Tasnifi (m.107 ve m.108 Uyumlu)</h3>
+                <p style="color:#64748b; font-size: 0.9rem;">Birden fazla suç varsa, oranları artıranları işaretleyiniz.</p>
+                <div class="checkbox-group" style="padding: 15px;">
+                    
+                    <div class="checkbox-section-title" style="color: var(--warning);">KADEME 1: İnfaz Oranını 2/3'e Çıkaran Suçlar</div>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_81_82_83"> <div>Kasten Öldürme (TCK 81, 82, 83)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_87_94_96"> <div>İşkence, Eziyet, Nitelikli Yaralama (TCK 87/2-d, 94, 95, 96)</div></label>
+                    <label class="checkbox-item" style="border-left: 4px solid var(--warning);"><input type="checkbox" id="crime_132_138"> <div>Özel Hayata Karşı Suçlar (TCK 132-138)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_102_1_104_1_105"> <div>Cinsel Saldırı/Taciz (Basit) (TCK 102/1, 104/1, 105)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_326_339"> <div>Devlet Sırlarına Karşı Suçlar (TCK 326-339)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_220"> <div>Örgüt Kurma / Yönetme / Üyelik (TCK 220 Adi)</div></label>
+
+                    <div class="checkbox-section-title" style="color: var(--danger);">KADEME 2: İnfaz Oranını 3/4'e Çıkaran Suçlar</div>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_188"> <div>Uyuşturucu İmal ve Ticareti (TCK 188)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_102_2_103_104_2_3"> <div>Nitelikli Cinsel Saldırı / Çocuk İstismarı (TCK 102/2, 103, 104/2-3)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_terror"> <div>Terör Suçları (TMK Kapsamındaki Suçlar)</div></label>
+                    
+                    <label class="checkbox-item" id="terror_pisman_group" style="display: none; border: 1px solid #bbf7d0; background: #f0fdf4;">
+                        <input type="checkbox" id="terror_pisman">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="color: #166534; font-weight: bold;">Örgütten Ayrılma (İdare ve Gözlem Kurulu Tespiti)</span>
+                        </div>
+                    </label>
+
+                    <div class="checkbox-section-title" style="color: var(--secondary);">KADEME 3: Açık Cezaevi Özel Durumları</div>
+                    <label class="checkbox-item" style="border: 1px solid #fecdd3; background: #fff1f2;">
+                        <input type="checkbox" id="open_prison_ban"> 
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="color: #be123c; font-weight: bold;">Açığa Ayrılma Kesin Engeli Var</span>
+                            <span style="color: #64748b; font-size: 0.75rem; margin-top: 3px;">(KS Geri alınması, 2. kez firar, infaz yanması vb.)</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_theft"> <div>Hırsızlık, Yağma (TCK 142, 148, 149) (Açığa 5 Yıl Kala)</div></label>
+                    <label class="checkbox-item"><input type="checkbox" id="crime_spouse_injury"> <div>Eşe/Kardeşe Kasten Yaralama (TCK 86/3-a, 96/2-b) (Açığa 3 Yıl)</div></label>
+                </div>
+            </div>
+
+            <!-- STEP 5: Sonuçlar -->
+            <div class="step-panel" id="panel5">
+                <h3>Adım 5: Kusursuz İnfaz Takvimi</h3>
+                <div class="tabs">
+                    <div class="tab-btn active" data-tab="tab_summary">Kapalı / Açık Analizi</div>
+                    <div class="tab-btn" data-tab="tab_options">Ne Yapılabilir? (Dilekçe Modülü)</div>
+                </div>
+
+                <div id="tab_summary" class="tab-content active">
+                    <div class="result-grid">
+                        <div class="result-card danger">
+                            <div class="result-label">Kapalı Cezaevi (Net Yatar)</div>
+                            <div class="result-val" id="resKapali">--</div>
+                            <div class="result-sub" id="resKapaliDate">Tahliye/Açığa Geçiş: --</div>
+                        </div>
+                        <div class="result-card warning">
+                            <div class="result-label">Açık Cezaevi (Net Yatar)</div>
+                            <div class="result-val" id="resAcik">--</div>
+                            <div class="result-sub" id="resDsDate">DS ile Tahliye: --</div>
+                        </div>
+                        <div class="result-card success">
+                            <div class="result-label">Koşullu Salıverilme (KS)</div>
+                            <div class="result-val" id="resKS">--</div>
+                            <div class="result-sub">İmza Sürecinin Bitişi</div>
+                        </div>
+                        <div class="result-card primary">
+                            <div class="result-label">Hak Ederek Tahliye (HET)</div>
+                            <div class="result-val" id="resHET">--</div>
+                            <div class="result-sub">Dosyanın Kapanışı</div>
+                        </div>
+                    </div>
+                    <div id="calcLogicNotes" class="info-box"></div>
+                </div>
+
+                <div id="tab_options" class="tab-content">
+                    <div class="option-grid" id="resOptions"></div>
+                </div>
+            </div>
+
+            <div class="nav-btns">
+                <button type="button" class="btn btn-secondary" id="btnPrev" disabled>Geri</button>
+                <button type="button" class="btn btn-primary" id="btnNext">İleri</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Dilekçe Bilgileri -->
+<div id="petitionModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Dilekçe Veri Girişi</h2>
+            <button type="button" class="btn-close" onclick="App.closePetitionModal()">×</button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Makam Adı (İl/İlçe)</label><input type="text" id="petMakam" placeholder="Örn: İSTANBUL İNFAZ HÂKİMLİĞİ'NE"></div>
+            <div class="form-group"><label>Hükümlü Adı Soyadı</label><input type="text" id="petConvictName" placeholder="Ahmet Yılmaz"></div>
+            <div class="form-group"><label>Hükümlü T.C. Kimlik</label><input type="text" id="petConvictTC" placeholder="12345678901"></div>
+            <div class="form-group"><label>Kararı Veren Mahkeme</label><input type="text" id="petCourtName" placeholder="İstanbul 1. Ağır Ceza Mahkemesi"></div>
+            <div class="form-group"><label>Esas / Karar No</label><input type="text" id="petFileNo" placeholder="2024/101 E. - 2024/205 K."></div>
+            <div class="form-group"><label>Avukat Adı Soyadı</label><input type="text" id="petLawyerName" placeholder="Av. Ali Veli"></div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Özel Durum / Mazeret (İsteğe Bağlı)</label>
+                <textarea id="petCustomReason" placeholder="Örn: Müvekkil halihazırda X Üniversitesinde son sınıf öğrencisi olup..."></textarea>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Ekler (İsteğe Bağlı)</label>
+                <input type="text" id="petAttachments" placeholder="Örn: 1- Öğrenci Belgesi, 2- Nüfus Kayıt Örneği">
+            </div>
+        </div>
+        <button type="button" class="btn btn-success" onclick="App.generateAndPrintPetition()">🖨️ Dilekçeyi Oluştur ve Önizle</button>
+    </div>
+</div>
+
+<!-- Print Area: Otomatik Dilekçe -->
+<div id="printArea" class="print-area">
+    <div class="editable-hint">💡 Önizleme Ekranındasınız: Dilekçe metninin üzerine tıklayarak istediğiniz yeri doğrudan değiştirebilir, silebilir veya yeni paragraflar ekleyebilirsiniz.</div>
+    <div class="print-toolbar">
+        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Yazdır (Çalışmazsa Ctrl+P)</button>
+        <button type="button" class="btn btn-secondary" onclick="App.closePrintView()">🔙 Geri Dön</button>
+    </div>
+    
+    <div class="print-document" contenteditable="true" spellcheck="false" id="editableDocument">
+        <div class="print-header" id="printMakam">MAKAM ADI'NA</div>
+        
+        <div class="print-row">
+            <div class="print-label">TALEP EDEN<br>HÜKÜMLÜ :</div>
+            <div class="print-content" id="printConvict">Ahmet Yılmaz (TC: 12345678901)</div>
+        </div>
+        <div class="print-row">
+            <div class="print-label">MÜDAFİİ :</div>
+            <div class="print-content" id="printLawyer">Av. Ali Veli</div>
+        </div>
+        <div class="print-row">
+            <div class="print-label">KONU :</div>
+            <div class="print-content"><b id="printSubject">M.110 Kapsamında Talebimizdir.</b></div>
+        </div>
+
+        <div class="print-body">
+            <p><b>AÇIKLAMALAR :</b></p>
+            <p><b>1-</b> Müvekkil hakkında <span id="printCourtText">X Mahkemesi</span>'nin <span id="printFileText">Y Sayılı</span> ilamı ile <span id="printSentenceText">Z Yıl</span> hapis cezası verilmiş olup, cezası kesinleşmiş ve infaz işlemleri başlamıştır.</p>
+            <p><b>2-</b> <span id="printReasonText">Kanuni gerekçe buraya gelecek.</span></p>
+            
+            <p id="printCustomReasonContainer" style="display: none;"><b>3-</b> <span id="printCustomReasonText">Özel Mazeret Buraya Gelecek</span></p>
+            
+            <p><b><span id="printLastParaNum">3</span>-</b> 5275 sayılı Ceza ve Güvenlik Tedbirlerinin İnfazı Hakkında Kanun ve ilgili mevzuat çerçevesinde yapılan hesaplamalar neticesinde, müvekkilin kanunda aranan yaş, ceza sınırı ve suç türü gibi tüm yasal şartları eksiksiz bir şekilde taşıdığı sabittir.</p>
+            
+            <p><b>SONUÇ VE İSTEM :</b></p>
+            <p>Yukarıda arz ve izah edilen nedenlerle ve re'sen gözetilecek hususlar ışığında; müvekkil hakkındaki hapis cezasının <b><span id="printResultText">Talep Sonucu</span></b> doğrultusunda infaz edilmesine karar verilmesini, bilvekale saygılarımla talep ederim. <span id="printDateText"></span></p>
+        </div>
+
+        <div class="print-footer">
+            <div class="print-attachments" id="printAttachmentsContainer" style="display: none;">
+                <b>EKLER:</b><br>
+                <span id="printAttachmentsText"></span>
+            </div>
+            <div class="print-sign" style="margin-left: auto;">
+                <b>Hükümlü Müdafii</b><br>
+                <span id="printSignName">Av. Ali Veli</span><br>
+                (e-imzalıdır)
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * 🔒 GÜVENLİK VE ERİŞİM KONTROL (Security Module)
+ */
+const SecurityApp = {
+    // ŞİFRE BURADAN DEĞİŞTİRİLEBİLİR
+    accessCode: '1234',
+    
+    init() {
+        this.blockInspectors();
+    },
+
+    checkAuth() {
+        const input = document.getElementById('authPassword').value;
+        if (input === this.accessCode) {
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('mainUi').classList.add('unlocked');
+            App.init(); // Yetki verilirse motoru çalıştır
+        } else {
+            document.getElementById('authError').style.display = 'block';
+        }
+    },
+
+    blockInspectors() {
+        // 1. Sağ Tık Engeli (Dilekçe alanı hariç)
+        document.addEventListener('contextmenu', e => {
+            if (!e.target.closest('#editableDocument') && !e.target.closest('input')) {
+                e.preventDefault();
+            }
+        });
+
+        // 2. Klavye Kısayolları Engeli (F12, Ctrl+Shift+I, Ctrl+U vb.)
+        document.addEventListener('keydown', e => {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) || 
+                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+};
+
+window.onload = () => SecurityApp.init();
+
+/**
+ * ⚖️ İNFAZMATİK PRO ELİTE (Hesaplama Motoru)
+ */
+const MEVZUAT = {
+    tarihler: { gecici10: '2023-07-31', yuzde10_kural: '2025-06-04' },
+    ds: { standard_yr: 1, min_closed_days: 5 },
+    acik: {
+        dogrudan_kasten_sinir: 3, dogrudan_taksir_sinir: 5,
+        kapali_min_oran: 1/10, kapali_kisa_sure: 30,
+        limit_standart: 7, limit_hirsizlik_uyusturucu: 5, limit_cinsel_ese_karsi: 3, limit_terror_pisman: 1
+    },
+    m110: { v1_kasten: 3, v1_taksir: 5, v2_std: 3, v2_70: 4, v2_75: 5, v2_80: 6, v4_birth: 5 },
+    m16: { childAgeLimit: 10, birthLimitMonths: 18 },
+    m17: { limitKasten: 3, limitTaksir: 5 }
+};
+
+const App = {
+    currentStep: 1,
+    mahsupDays: 0,
+    currentOptionsData: [], 
+    selectedOptionIndex: null,
+
+    init() {
+        this.bindEvents();
+        this.addMahsupRow();
+    },
+
+    bindEvents() {
+        document.getElementById('btnNext').onclick = () => this.moveStep(1);
+        document.getElementById('btnPrev').onclick = () => this.moveStep(-1);
+        document.getElementById('btnAddMahsup').onclick = () => this.addMahsupRow();
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.onclick = (e) => this.switchTab(e.target));
+        
+        document.getElementById('gaveBirth').onchange = (e) => {
+            document.getElementById('birthDateGroup').style.display = e.target.checked ? 'flex' : 'none';
+        };
+        document.getElementById('recidivism').onchange = (e) => {
+            document.getElementById('priorSentenceGroup').style.display = e.target.value === 'once' ? 'flex' : 'none';
+        };
+        
+        const checkTerror = () => {
+            const isTerror = document.getElementById('crime_terror').checked;
+            document.getElementById('terror_pisman_group').style.display = isTerror ? 'flex' : 'none';
+            if (!isTerror) document.getElementById('terror_pisman').checked = false;
+        };
+        document.getElementById('crime_terror').onchange = checkTerror;
+        document.getElementById('mahsupContainer').onchange = () => this.calculateMahsup();
+
+        window.onafterprint = () => { this.closePetitionModal(); };
+    },
+
+    moveStep(dir) {
+        if (dir === 1 && this.currentStep === 5) { window.location.reload(); return; }
+        
+        document.getElementById(`panel${this.currentStep}`).classList.remove('active');
+        document.querySelector(`.step-bubble[data-step="${this.currentStep}"]`).classList.remove('active');
+        if (dir > 0) document.querySelector(`.step-bubble[data-step="${this.currentStep}"]`).classList.add('completed');
+        this.currentStep += dir;
+        document.getElementById(`panel${this.currentStep}`).classList.add('active');
+        document.querySelector(`.step-bubble[data-step="${this.currentStep}"]`).classList.add('active');
+        document.getElementById('btnPrev').disabled = (this.currentStep === 1);
+        document.getElementById('btnNext').innerText = (this.currentStep === 4) ? 'Hesapla' : (this.currentStep === 5 ? 'Baştan Başla' : 'İleri');
+        if (this.currentStep === 5) this.runEngine();
+    },
+
+    switchTab(target) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        target.classList.add('active');
+        document.getElementById(target.dataset.tab).classList.add('active');
+    },
+
+    addMahsupRow() {
+        const div = document.createElement('div');
+        div.className = 'mahsup-row';
+        div.innerHTML = `<div class="form-group"><label>Başlangıç</label><input type="date" class="m-start"></div>
+                         <div class="form-group"><label>Bitiş</label><input type="date" class="m-end"></div>
+                         <button type="button" class="btn-remove">×</button>`;
+        div.querySelector('.btn-remove').onclick = () => { div.remove(); this.calculateMahsup(); };
+        document.getElementById('mahsupContainer').appendChild(div);
+    },
+
+    calculateMahsup() {
+        let total = 0;
+        document.querySelectorAll('.mahsup-row').forEach(row => {
+            const sInput = row.querySelector('.m-start');
+            const eInput = row.querySelector('.m-end');
+            const s = sInput.value;
+            const e = eInput.value;
+            
+            sInput.style.borderColor = 'var(--border)';
+            eInput.style.borderColor = 'var(--border)';
+
+            if (s && e) {
+                const dateS = new Date(s); const dateE = new Date(e);
+                if (dateE < dateS) {
+                    sInput.style.borderColor = 'var(--danger)';
+                    eInput.style.borderColor = 'var(--danger)';
+                } else {
+                    const diff = Math.ceil((dateE - dateS) / (1000*60*60*24)) + 1;
+                    if (diff > 0) total += diff;
+                }
+            }
+        });
+        this.mahsupDays = total;
+        document.getElementById('mahsupSummary').innerText = `Toplam Mahsup: ${total} Gün`;
+    },
+
+    runEngine() {
+        const d = this.getFormData();
+        const totalDays = (d.valY * 365) + (d.valM * 30) + d.valD;
+        const totalYearsExact = totalDays / 365;
+        const entryDate = d.entryDate ? new Date(d.entryDate) : new Date();
+        const crimeDate = d.crimeDate ? new Date(d.crimeDate) : null;
+        let notes = "<ul>";
+
+        let crimeAge = null;
+        if (d.birthDate && crimeDate) {
+            let ageDiff = crimeDate.getFullYear() - new Date(d.birthDate).getFullYear();
+            let m = crimeDate.getMonth() - new Date(d.birthDate).getMonth();
+            if (m < 0 || (m === 0 && crimeDate.getDate() < new Date(d.birthDate).getDate())) { ageDiff--; }
+            crimeAge = ageDiff;
+            notes += `<li><b>Yaş Tespiti:</b> Suç tarihinde hükümlünün yaşı <b>${crimeAge}</b> olarak tespit edildi.</li>`;
+        }
+        const isJuvenile = crimeAge !== null && crimeAge < 18;
+
+        let baseRatio = 1/2; 
+        
+        const hasTwoThirdCrime = d.crime_81_82_83 || d.crime_87_94_96 || d.crime_132_138 || 
+                                 d.crime_102_1_104_1_105 || d.crime_326_339 || d.crime_220;
+        if (hasTwoThirdCrime) baseRatio = Math.max(baseRatio, 2/3);
+
+        const hasThreeQuarterCrime = d.crime_188 || d.crime_102_2_103_104_2_3 || d.crime_terror;
+        let cinselOrUyusturucu = d.crime_188 || d.crime_102_2_103_104_2_3 || d.crime_102_1_104_1_105;
+
+        if (hasThreeQuarterCrime) {
+            if (isJuvenile && cinselOrUyusturucu) {
+                baseRatio = Math.max(baseRatio, 2/3);
+                notes += "<li>👦 <b>Çocuk İstisnası (m.108/10):</b> Nitelikli cinsel/uyuşturucu suçu olmasına rağmen suç tarihinde 18 yaşından küçük olunduğu için oran 3/4 yerine lehe olarak <b>2/3</b> uygulanmıştır.</li>";
+            } else if (isJuvenile && d.crime_terror) {
+                baseRatio = Math.max(baseRatio, 2/3); 
+                notes += "<li>👦 <b>TMK Çocuk (m.107/2):</b> Terör suçu olmasına rağmen çocuk olduğu için oran <b>2/3</b> uygulanmıştır.</li>";
+            } else {
+                baseRatio = Math.max(baseRatio, 3/4);
+            }
+        }
+
+        notes += `<li>⚖️ <b>Temel İnfaz Oranı (baseRatio):</b> Tespit edilen suç vasıflarına göre <b>${baseRatio === 1/2 ? "1/2" : baseRatio === 2/3 ? "2/3" : "3/4"}</b> olarak belirlenmiştir.</li>`;
+
+        let baseKsDays = 0;
+        let isTerrorAdult = d.crime_terror && !isJuvenile;
+        
+        if (d.sentenceType === 'sureli') {
+            baseKsDays = Math.floor(totalDays * baseRatio);
+        } else if (d.sentenceType === 'muebbet') {
+            baseKsDays = (isTerrorAdult || hasTwoThirdCrime || hasThreeQuarterCrime) ? (30 * 365) : (24 * 365); 
+        } else if (d.sentenceType === 'agirlastirilmis') {
+            baseKsDays = (isTerrorAdult || hasTwoThirdCrime || hasThreeQuarterCrime) ? (36 * 365) : (30 * 365);
+        }
+
+        if (d.crime_multiple && d.sentenceType === 'sureli') {
+            let capYears = (baseRatio > 1/2 || d.recidivism !== 'none' || d.crime_220) ? 32 : 28;
+            if (baseKsDays > (capYears * 365)) {
+                baseKsDays = capYears * 365;
+                notes += `<li>🛑 <b>Tavan İnfaz Sınırı (m.107):</b> İçtimalı süreli hapislerde infaz süresi <b>${capYears} Yılı</b> geçemeyeceğinden sınırlandırma yapılmıştır.</li>`;
+            }
+        }
+
+        let ksDays = baseKsDays;
+        if (d.birthDate) {
+            const birth = new Date(d.birthDate);
+            const turn15Date = new Date(birth.getFullYear() + 15, birth.getMonth(), birth.getDate());
+            if (entryDate < turn15Date) {
+                let overlapStart = entryDate;
+                let tempKsDate = this.addDays(entryDate, ksDays);
+                let overlapEnd = turn15Date < tempKsDate ? turn15Date : tempKsDate;
+                
+                if (overlapStart < overlapEnd) {
+                    let daysUnder15InPrison = Math.floor((overlapEnd - overlapStart) / (1000*60*60*24));
+                    let bonusDays = Math.min(ksDays, daysUnder15InPrison);
+                    if(bonusDays > 0) {
+                        ksDays -= bonusDays;
+                        notes += `<li>👦 <b>15 Yaş İndirimi (m.107/5):</b> Ceza infaz kurumunda 15 yaşını doldurmadan geçirilen süreler çift sayıldığından Koşullu Salıverilme tarihiniz <b>${bonusDays} gün</b> öne çekilmiştir.</li>`;
+                    }
+                }
+            }
+        }
+
+        if (d.recidivism === 'once') {
+            let tekerrurKs = d.sentenceType === 'sureli' ? Math.floor(totalDays * (3/4)) : (d.sentenceType === 'muebbet' ? 33*365 : 39*365); 
+            
+            let effectiveRatio = Math.max(baseRatio, 2/3); 
+            tekerrurKs = d.sentenceType === 'sureli' ? Math.floor(totalDays * effectiveRatio) : (d.sentenceType === 'muebbet' ? 33*365 : 39*365);
+            
+            if (d.crime_multiple && d.sentenceType === 'sureli' && tekerrurKs > 32*365) tekerrurKs = 32*365;
+            
+            tekerrurKs = Math.max(ksDays, tekerrurKs);
+            const addedDays = tekerrurKs - ksDays;
+            const priorDays = (d.priorY * 365) + (d.priorM * 30) + d.priorD;
+            
+            if (addedDays > 0 && priorDays > 0 && addedDays > priorDays) {
+                ksDays = ksDays + priorDays;
+                notes += `<li><b>m.108/2:</b> Tekerrür artışı (${addedDays} gün), önceki cezadan (${priorDays} gün) fazla olamayacağından sınırlandırıldı.</li>`;
+            } else {
+                ksDays = tekerrurKs;
+            }
+        } else if (d.recidivism === 'twice') {
+            let effectiveRatio = Math.max(baseRatio, 3/4);
+            ksDays = d.sentenceType === 'sureli' ? Math.floor(totalDays * effectiveRatio) : (d.sentenceType === 'muebbet' ? 33*365 : 39*365);
+            if (d.crime_multiple && d.sentenceType === 'sureli' && ksDays > 32*365) ksDays = 32*365;
+            notes += "<li><b>2. Kez Mükerrer:</b> m.108/2 sınırı olmaksızın koşullu salıverilme 3/4 olarak (veya ağır cezalarda kendi tavanı) uygulandı.</li>";
+        }
+
+        const effectiveKsDays = Math.max(0, ksDays - this.mahsupDays);
+        const effectiveHetDays = Math.max(0, totalDays - this.mahsupDays);
+
+        let kapaliDays = 0;
+        let acikDays = 0;
+        let dsKalanSureDays = 0;
+        let asalaAcigaGidemez = false;
+        let isDirectOpen = false;
+
+        const isSexual = d.crime_102_1_104_1_105 || d.crime_102_2_103_104_2_3;
+        const isTerrorOrg = d.crime_terror || d.crime_220;
+        const isTheftDrug = d.crime_188 || d.crime_theft;
+
+        if (d.sentenceType === 'agirlastirilmis' || d.open_prison_ban) {
+            asalaAcigaGidemez = true;
+            notes += "<li>🚨 <b>Açığa Ayrılma Engeli:</b> Ağırlaştırılmış müebbet veya yasal infaz engeli sebebiyle cezanın tamamı kapalıda infaz edilir.</li>";
+        } else if (isTerrorOrg && !d.terror_pisman) {
+            asalaAcigaGidemez = true;
+            notes += "<li>🚨 <b>Madde 8 Engeli:</b> Terör/Örgüt suçlusu olup, idare ve gözlem kurulunca örgütten ayrıldığı tespit edilmediği için açığa ayrılamaz.</li>";
+        }
+
+        const g10Cutoff = new Date(MEVZUAT.tarihler.gecici10);
+        const isG10CrimeDate = crimeDate && crimeDate <= g10Cutoff;
+        const isG10EntryDate = entryDate && entryDate <= g10Cutoff;
+        const isG10ExcludedCrime = isTerrorOrg || isSexual || d.crime_81_82_83 || d.crime_326_339;
+        
+        let isG10 = false;
+        if (isG10CrimeDate && d.recidivism !== 'twice') {
+            if (isG10EntryDate) {
+                isG10 = true;
+                notes += "<li>✅ <b>Lehe Kanun:</b> 31/07/2023'te cezaevinde olunduğu için suç türüne bakılmaksızın Geçici 10 uygulanır.</li>";
+            } else if (!isG10ExcludedCrime) {
+                isG10 = true;
+                notes += "<li>✅ <b>Geçici 10 (7571 S.K.):</b> Suç tarihi ve türü uyduğu için +3 yıl erken DS hakkı aktiftir.</li>";
+            }
+        }
+
+        if (!asalaAcigaGidemez) {
+            const noDirectOpenExceptions = !isTerrorOrg && !isSexual && d.recidivism !== 'twice'; 
+            if (noDirectOpenExceptions) {
+                if (d.crimeIntent === 'intentional' && totalYearsExact <= MEVZUAT.acik.dogrudan_kasten_sinir) isDirectOpen = true;
+                if (d.crimeIntent === 'negligent' && totalYearsExact <= MEVZUAT.acik.dogrudan_taksir_sinir) isDirectOpen = true;
+            }
+
+            if (isDirectOpen) {
+                kapaliDays = 0;
+                notes += "<li>🔓 <b>Doğrudan Açık (Madde 5):</b> Şartları sağladığınız için cezanızın infazına doğrudan açık cezaevinde başlanır.</li>";
+            } else {
+                let stdKapaliDays = 0;
+                if (d.sentenceType === 'muebbet') {
+                    stdKapaliDays = Math.max(0, ksDays - (5 * 365));
+                } else {
+                    if (totalYearsExact < 10) stdKapaliDays = MEVZUAT.acik.kapali_kisa_sure;
+                    else stdKapaliDays = Math.floor(totalDays * MEVZUAT.acik.kapali_min_oran); 
+                }
+
+                let kalanSureLimiti = MEVZUAT.acik.limit_standart * 365;
+                if (isTheftDrug) kalanSureLimiti = MEVZUAT.acik.limit_hirsizlik_uyusturucu * 365;
+                if (isSexual || d.crime_spouse_injury || d.crime_81_82_83) kalanSureLimiti = MEVZUAT.acik.limit_cinsel_ese_karsi * 365;
+                if (isTerrorOrg && d.terror_pisman) kalanSureLimiti = MEVZUAT.acik.limit_terror_pisman * 365;
+
+                stdKapaliDays = Math.max(stdKapaliDays, ksDays - kalanSureLimiti);
+                kapaliDays = stdKapaliDays;
+
+                if (isG10) {
+                    let g10KapaliMin = totalYearsExact < 10 ? 30 : 90;
+                    let g10ErkenAcik = stdKapaliDays - (3 * 365); 
+                    kapaliDays = Math.max(g10KapaliMin, g10ErkenAcik);
+                    notes += `<li>⚠️ <b>7571 Asgari Yatar:</b> Geçici 10 sebebiyle açığa ayrılma öne çekilmiş, ancak kanun gereği en az <b>${g10KapaliMin} gün</b> kapalıda kalma zorunluluğu uygulanmıştır.</li>`;
+                } else {
+                    notes += "<li>⚖️ <b>Kapalıdan Açığa Ayrılma:</b> Yönetmelik Madde 6'daki yatar ve kalan süre limitleri hesaplanmıştır.</li>";
+                }
+            }
+        }
+
+        kapaliDays = Math.max(0, kapaliDays - this.mahsupDays);
+        if (asalaAcigaGidemez) kapaliDays = effectiveKsDays;
+
+        if (asalaAcigaGidemez) {
+            dsKalanSureDays = 0; 
+        } else {
+            if (isG10) dsKalanSureDays = 3 * 365;
+            else dsKalanSureDays = MEVZUAT.ds.standard_yr * 365;
+        }
+
+        let totalMinYatar = kapaliDays;
+        if (!asalaAcigaGidemez) {
+            if (isG10) {
+                totalMinYatar = kapaliDays + 90; 
+            } else if (crimeDate && crimeDate >= new Date(MEVZUAT.tarihler.yuzde10_kural)) {
+                let yuzde10Kural = Math.max(MEVZUAT.ds.min_closed_days, Math.floor(effectiveKsDays * 0.1));
+                if (isDirectOpen) {
+                    totalMinYatar = Math.max(kapaliDays, yuzde10Kural);
+                    notes += `<li>🔓 <b>Yeni Yasa (%10 Kuralı):</b> 04.06.2025 sonrası suçlarda KS süresinin %10'u (en az ${yuzde10Kural} gün) infaz kurumunda geçirilmelidir. (Açık Cezaevinde).</li>`;
+                } else {
+                    totalMinYatar = Math.max(kapaliDays, yuzde10Kural);
+                    kapaliDays = totalMinYatar;
+                    notes += `<li>🔒 <b>Yeni Yasa (%10 Kuralı):</b> 04.06.2025 sonrası suçlarda KS süresinin %10'u (en az ${yuzde10Kural} gün) kapalıda zorunludur.</li>`;
+                }
+            }
+        }
+
+        let actualYatarDaysBeforeDs = Math.max(totalMinYatar, effectiveKsDays - dsKalanSureDays);
+        actualYatarDaysBeforeDs = Math.max(kapaliDays, actualYatarDaysBeforeDs); 
+        
+        acikDays = Math.max(0, actualYatarDaysBeforeDs - kapaliDays);
+        if (actualYatarDaysBeforeDs >= effectiveKsDays) {
+            actualYatarDaysBeforeDs = effectiveKsDays;
+            acikDays = effectiveKsDays - kapaliDays;
+        }
+
+        notes += "</ul>";
+
+        document.getElementById('resKapali').innerText = this.formatDays(kapaliDays);
+        document.getElementById('resKapaliDate').innerText = `Tahliye/Açığa Geçiş: ${this.formatDate(this.addDays(entryDate, kapaliDays))}`;
+        
+        document.getElementById('resAcik').innerText = this.formatDays(acikDays);
+        document.getElementById('resDsDate').innerText = `DS ile Tahliye: ${this.formatDate(this.addDays(entryDate, actualYatarDaysBeforeDs))}`;
+        
+        document.getElementById('resKS').innerText = this.formatDate(this.addDays(entryDate, effectiveKsDays));
+        document.getElementById('resHET').innerText = this.formatDate(this.addDays(entryDate, effectiveHetDays));
+        
+        document.getElementById('calcLogicNotes').innerHTML = notes;
+
+        this.renderAllOptions(d, totalYearsExact, isSexual, isTerrorOrg);
+    },
+
+    renderAllOptions(d, totalYears, isSexual, isTerrorOrg) {
+        const container = document.getElementById('resOptions');
+        container.innerHTML = "";
+        const age = this.calculateAge(d.birthDate);
+        const childAgeMonths = this.calculateDiffMonths(d.childBirthDate);
+        
+        const isExcludedM110 = isTerrorOrg || isSexual;
+        const isExcludedM17 = isTerrorOrg || isSexual || d.recidivism !== 'none';
+
+        const options = [];
+
+        options.push({ 
+            title: "Akıl Hastalığı / Hayati Tehlike (m.16/1,2)", 
+            eligible: d.hasSevereIllness, 
+            shortReason: "Hükümlü iyileşinceye kadar infaz geriye bırakılır.", 
+            auth: "C. Başsavcılığı", 
+            subject: "m.16 Kapsamında Hastalık Sebebiyle İnfazın Ertelenmesi Talebi", 
+            eliteReason: "Müvekkilin mevcut ciddi sağlık sorunları ve dosyaya mübrez tıbbi raporlar muvacehesinde, 5275 sayılı Kanun'un 16. maddesi kapsamında ceza infaz kurumu koşullarında tedavisinin ve hayatını yalnız idame ettirmesinin mümkün olmadığı aşikâr olup; telafisi imkânsız zararların doğmaması adına infazın, müvekkil iyileşinceye değin ertelenmesi kanuni bir zorunluluktur.",
+            resultText: "hastalık süresince geri bırakılması ve ertelenmesi" 
+        });
+        
+        const isPregnancyEligible = d.gender === 'female' && (d.isPregnant || (childAgeMonths >= 0 && childAgeMonths < MEVZUAT.m16.birthLimitMonths));
+        options.push({ 
+            title: "Gebelik/Doğum Ertelemesi (m.16/4)", 
+            eligible: isPregnancyEligible, 
+            shortReason: "Gebelik veya doğumdan itibaren 1.5 yıl geçmemişse infaz durur.", 
+            auth: "C. Başsavcılığı", 
+            subject: "m.16/4 Uyarınca Gebelik/Doğum Sebebiyle İnfazın Ertelenmesi Talebi", 
+            eliteReason: "Müvekkilin gebelik/doğum durumu ve dosyaya mübrez sağlık raporları muvacehesinde, 5275 sayılı Kanun'un 16/4. maddesi amir hükmü gereğince ceza infaz kurumu koşullarında kalması hukuka ve vicdana aykırı olup; infazın kanuni süreler çerçevesinde ertelenmesi gerekmektedir.",
+            resultText: "gebelik/doğum sebebiyle kanuni süreler çerçevesinde ertelenmesi" 
+        });
+        
+        const m17Limit = (d.crimeIntent === 'intentional') ? MEVZUAT.m17.limitKasten : MEVZUAT.m17.limitTaksir;
+        options.push({ 
+            title: "Çağrı Üzerine Teslim ile Erteleme (m.17/1)", 
+            eligible: !isExcludedM17 && d.calledBySummons && totalYears <= m17Limit && m17Limit > 0, 
+            shortReason: "Kasten suçlarda 3y, taksirde 5y sınırı ve davetiye üzerine teslim hali.", 
+            auth: "C. Başsavcılığı", 
+            subject: "m.17/1 Uyarınca İnfazın Ertelenmesi Talebi", 
+            eliteReason: "Müvekkil hakkında hükmolunan hapis cezasının miktarı ve hakkında verilmiş herhangi bir yakalama kararı bulunmaksızın kendi rızasıyla çağrı üzerine teslim olması hususları birlikte değerlendirildiğinde; 5275 sayılı Kanun'un 17/1. maddesi kapsamında hapis cezasının infazının ertelenmesi için gerekli tüm maddi ve şekli şartlar tekevvün etmiştir.",
+            resultText: "çağrı üzerine teslim olunması hasebiyle ertelenmesi" 
+        });
+
+        let v1_limit = (d.crimeIntent === 'intentional') ? MEVZUAT.m110.v1_kasten : MEVZUAT.m110.v1_taksir;
+        if(d.crimeIntent === 'negligentHomicide') v1_limit = 0;
+        options.push({ 
+            title: "Hafta Sonu / Gece İnfaz (m.110/1)", 
+            eligible: !isExcludedM110 && totalYears <= v1_limit && v1_limit > 0, 
+            shortReason: "Kasten suçlarda 3y, taksirde 5y sınırı.", 
+            auth: "İnfaz Hâkimi", 
+            subject: "m.110/1 Kapsamında Hafta Sonu/Gece İnfaz Talebi", 
+            eliteReason: "Müvekkil hakkında tesis edilen ceza miktarı ve suçun vasfı göz önüne alındığında; 5275 sayılı Kanun'un 110. maddesinin 1. fıkrasında tanzim edilen 'Hafta sonu veya geceleyin infaz' kurumu için kanun koyucu tarafından aranan tüm yasal şartların müvekkil nezdinde sübuta erdiği açıktır.",
+            resultText: "hafta sonu / gece infaz usulüne göre yerine getirilmesi" 
+        });
+
+        let v2_limit = 0; let v2_label = "";
+        if (age >= 80) { v2_limit = 6; v2_label = "80+"; } else if (age >= 65 || d.gender === 'female' || age < 18) { v2_limit = 3; v2_label = "Kadın/Çocuk/65+"; }
+        options.push({ 
+            title: `Konutta İnfaz - ${v2_label} (m.110/2)`, 
+            eligible: !isExcludedM110 && v2_limit > 0 && totalYears <= v2_limit, 
+            shortReason: `İlgili yaş/statü gereği sınır ${v2_limit} yıldır.`, 
+            auth: "İnfaz Hâkimi", 
+            subject: "m.110/2 Kapsamında Konutta İnfaz Talebi", 
+            eliteReason: "Müvekkilin içinde bulunduğu yaş ve dezavantajlı grup statüsü ile hükmolunan ceza süresi dikkate alındığında; 5275 sayılı Kanun'un 110/2. maddesinde belirtilen 'Cezanın Konutta Çektirilmesi' usulünün uygulanabilmesi için aranan objektif kriterler karşılanmış olup, infazın bu usule göre yerine getirilmesi hakkaniyete ve kanunun lafzına uygun olacaktır.",
+            resultText: "konutta infaz usulüne göre çektirilmesi" 
+        });
+
+        this.currentOptionsData = options;
+
+        options.sort((a,b) => b.eligible - a.eligible).forEach((opt, index) => {
+            const card = document.createElement('div');
+            card.className = `option-card ${opt.eligible ? 'eligible' : 'not-eligible'}`;
+            
+            let btnHtml = opt.eligible ? `<button type="button" class="btn-success" style="padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold;" onclick="App.openPetitionModal(${index})">📄 Dilekçe Oluştur</button>` : '';
+
+            card.innerHTML = `<span class="badge ${opt.eligible ? 'badge-success' : 'badge-danger'}">${opt.eligible ? 'UYGUNDUR' : 'ŞARTLAR OLUŞMADI'}</span>
+                             <strong>${opt.title}</strong><p style="font-size:0.85rem; margin:10px 0;">${opt.shortReason}</p><div class="auth-tag" style="margin-bottom: 15px;">Makam: ${opt.auth}</div>
+                             ${btnHtml}`;
+            container.appendChild(card);
+        });
+    },
+
+    openPetitionModal(index) {
+        this.selectedOptionIndex = index;
+        document.getElementById('petitionModal').classList.add('active');
+        const today = new Date().toLocaleDateString('tr-TR');
+        document.getElementById('printDateText').innerText = today;
+    },
+
+    closePetitionModal() {
+        document.getElementById('petitionModal').classList.remove('active');
+        this.selectedOptionIndex = null;
+    },
+
+    generateAndPrintPetition() {
+        const d = this.getFormData();
+        const opt = this.currentOptionsData[this.selectedOptionIndex];
+
+        const makam = document.getElementById('petMakam').value || "İLGİLİ MAKAM'A";
+        const convictName = document.getElementById('petConvictName').value || "[Hükümlü Adı Soyadı]";
+        const convictTC = document.getElementById('petConvictTC').value || "[TC Kimlik]";
+        const courtName = document.getElementById('petCourtName').value || "[Mahkeme Adı]";
+        const fileNo = document.getElementById('petFileNo').value || "[Esas/Karar No]";
+        const lawyerName = document.getElementById('petLawyerName').value || "[Avukat Adı]";
+        const customReason = document.getElementById('petCustomReason').value;
+        const attachments = document.getElementById('petAttachments').value;
+        
+        const sentenceText = `${d.valY} Yıl ${d.valM} Ay ${d.valD} Gün`;
+
+        document.getElementById('printMakam').innerText = makam.toUpperCase();
+        document.getElementById('printConvict').innerText = `${convictName} (TC: ${convictTC})`;
+        document.getElementById('printLawyer').innerText = lawyerName;
+        document.getElementById('printSubject').innerText = opt.subject;
+        document.getElementById('printCourtText').innerText = courtName;
+        document.getElementById('printFileText').innerText = fileNo;
+        document.getElementById('printSentenceText').innerText = sentenceText;
+        document.getElementById('printReasonText').innerText = opt.eliteReason;
+        
+        const customReasonContainer = document.getElementById('printCustomReasonContainer');
+        const lastParaNum = document.getElementById('printLastParaNum');
+        if (customReason.trim() !== '') {
+            document.getElementById('printCustomReasonText').innerText = customReason;
+            customReasonContainer.style.display = 'block';
+            lastParaNum.innerText = "4"; 
+        } else {
+            customReasonContainer.style.display = 'none';
+            lastParaNum.innerText = "3";
+        }
+
+        const attachmentsContainer = document.getElementById('printAttachmentsContainer');
+        if (attachments.trim() !== '') {
+            document.getElementById('printAttachmentsText').innerText = attachments;
+            attachmentsContainer.style.display = 'block';
+        } else {
+            attachmentsContainer.style.display = 'none';
+        }
+
+        document.getElementById('printResultText').innerText = opt.resultText;
+        document.getElementById('printSignName').innerText = lawyerName;
+
+        document.querySelector('.main-ui').style.display = 'none';
+        document.getElementById('petitionModal').classList.remove('active');
+        document.getElementById('printArea').style.display = 'block';
+        
+        this.selectedOptionIndex = null;
+
+        setTimeout(() => { try { window.print(); } catch (e) { console.log("Blocked by browser."); } }, 300);
+    },
+    
+    closePrintView() {
+        document.getElementById('printArea').style.display = 'none';
+        document.querySelector('.main-ui').style.display = 'block';
+    },
+
+    getFormData() {
+        return {
+            sentenceType: document.getElementById('sentenceType').value,
+            crimeIntent: document.getElementById('crimeIntent').value,
+            valY: parseInt(document.getElementById('valY').value) || 0,
+            valM: parseInt(document.getElementById('valM').value) || 0,
+            valD: parseInt(document.getElementById('valD').value) || 0,
+            crime_multiple: document.getElementById('crime_multiple').checked,
+            priorY: parseInt(document.getElementById('priorY')?.value) || 0,
+            priorM: parseInt(document.getElementById('priorM')?.value) || 0,
+            priorD: parseInt(document.getElementById('priorD')?.value) || 0,
+            crimeDate: document.getElementById('crimeDate').value,
+            entryDate: document.getElementById('entryDate').value,
+            birthDate: document.getElementById('birthDate').value,
+            recidivism: document.getElementById('recidivism').value,
+            gender: document.getElementById('gender').value,
+            isPregnant: document.getElementById('isPregnant').checked,
+            gaveBirth: document.getElementById('gaveBirth').checked,
+            childBirthDate: document.getElementById('childBirthDate').value,
+            hasSevereIllness: document.getElementById('hasSevereIllness').checked,
+            calledBySummons: document.getElementById('calledBySummons').checked,
+            
+            crime_81_82_83: document.getElementById('crime_81_82_83').checked,
+            crime_87_94_96: document.getElementById('crime_87_94_96').checked,
+            crime_132_138: document.getElementById('crime_132_138').checked,
+            crime_102_1_104_1_105: document.getElementById('crime_102_1_104_1_105').checked,
+            crime_326_339: document.getElementById('crime_326_339').checked,
+            crime_220: document.getElementById('crime_220').checked,
+            crime_188: document.getElementById('crime_188').checked,
+            crime_102_2_103_104_2_3: document.getElementById('crime_102_2_103_104_2_3').checked,
+            crime_terror: document.getElementById('crime_terror').checked,
+            terror_pisman: document.getElementById('terror_pisman').checked,
+            open_prison_ban: document.getElementById('open_prison_ban').checked,
+            crime_theft: document.getElementById('crime_theft').checked,
+            crime_spouse_injury: document.getElementById('crime_spouse_injury').checked
+        };
+    },
+
+    addDays(d, days) { const r = new Date(d); r.setDate(r.getDate() + days); return r; },
+    formatDate(d) { return d && !isNaN(d) ? d.toLocaleDateString('tr-TR') : "YOK"; },
+    formatDays(days) { 
+        if(days <= 0) return "0 Gün";
+        const y = Math.floor(days / 365); const m = Math.floor((days % 365) / 30); const d = (days % 365) % 30;
+        let str = []; if(y>0) str.push(`${y}Y`); if(m>0) str.push(`${m}A`); if(d>0) str.push(`${d}G`);
+        return str.join(' ');
+    },
+    calculateAge(b) { return b ? Math.floor((Date.now() - new Date(b).getTime()) / 31557600000) : 0; },
+    calculateDiffMonths(d) {
+        if (!d) return -1;
+        const s = new Date(d); const e = new Date();
+        return (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+    }
+};
+
+// Obfuscator uyarısı: Obfuscator kullanmak isterseniz sadece yukarıdaki MEVZUAT ve App nesnelerini kopyalayıp şifreleyebilirsiniz.
+</script>
 </body>
 </html>
-
