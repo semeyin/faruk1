@@ -23,7 +23,6 @@
             margin: 0 auto;
         }
         
-        /* Login Modal */
         .modal {
             position: fixed;
             top: 0;
@@ -77,7 +76,6 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
-            color: #495057;
         }
         
         .search-box {
@@ -91,7 +89,6 @@
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             background: #f8f9fa;
-            transition: all 0.3s;
         }
         
         .search-box input:focus {
@@ -194,7 +191,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: slideIn 0.2s ease;
         }
         
         .delete-btn {
@@ -259,30 +255,36 @@
             flex-wrap: wrap;
             margin-top: 10px;
         }
+        
+        .test-mode {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Login Modal -->
         <div id="loginModal" class="modal">
             <div class="modal-content">
                 <h2>🔐 Giriş Yap</h2>
-                <p style="color:#666; margin:10px 0">Bu uygulama özeldir</p>
+                <p style="color:#666; margin:10px 0">Bu uygulama Kardo'ya özeldir</p>
                 <input type="text" id="username" placeholder="Kullanıcı Adı" autocomplete="off">
                 <input type="password" id="password" placeholder="Şifre">
                 <button onclick="login()" style="width:100%; margin-top:10px">Giriş Yap</button>
-                <p style="margin-top:15px; font-size:12px; color:#999">🔍 Sorgulama herkese açık</p>
+                <p style="margin-top:15px; font-size:12px; color:#999">🔍 Kitap sorgulama herkese açık</p>
             </div>
         </div>
         
-        <!-- Ana Uygulama -->
         <div id="mainApp" style="display:none;">
             <div class="card">
                 <div class="header">
                     <h1>📚 Kardo'nun Kitaplığı</h1>
                     <span class="lock-icon" onclick="logout()" title="Çıkış Yap">🔓</span>
                 </div>
-                <div class="badge">☁️ Bulut Senkronizasyonlu | 🔐 Korumalı</div>
+                <div class="badge">☁️ Google Sheets ile senkron | 🔐 Korumalı</div>
             </div>
             
             <div class="stats">
@@ -319,7 +321,7 @@
             </div>
             
             <div class="card">
-                <h3>📖 Kitaplarım ({{bookCount}})</h3>
+                <h3>📖 Kitaplarım</h3>
                 <div id="booksList"></div>
             </div>
             
@@ -328,19 +330,23 @@
     </div>
 
     <script>
-        // ============ KONFIGÜRASYON ============
-        const SHEETS_ID = '1IqVH9oXoaUmQ5i4k1mfhrD6c2D24lxwoIlE5PsrKTyI';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxk8uPZnrHvrQevqDNvUE_TkojFIGBUGqMKXXey_dHMlvXp7Yxxr-tESnX59SKJd9opBw/exec';
+        // ============ 🔴 BURAYA YENİ APPS SCRIPT URL'NİZİ YAPIŞTIRIN ============
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT_qoYm_nget_-nZhjGDFMvtvlRHqEjLZd4UWMqwjn3h0LOGzhSrOwciNEjv5fzsO_RA/exec'; // Deploy ettikten sonra gelen yeni URL
         
-        // Şifre bilgileri
         const VALID_USERNAME = 'Kardo';
         const VALID_PASSWORD = '616161';
         
-        // ============ GLOBAL DEĞİŞKENLER ============
         let books = [];
         let isLoggedIn = false;
         
-        // ============ GİRİŞ KONTROLÜ ============
+        // Test için demo veri (bulut çalışmazsa)
+        const DEMO_BOOKS = [
+            '1984 - George Orwell',
+            'Suç ve Ceza - Dostoyevski',
+            'Don Kişot - Cervantes',
+            'Kürk Mantolu Madonna - Sabahattin Ali'
+        ];
+        
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -362,11 +368,8 @@
             localStorage.removeItem('kitap_auth');
             document.getElementById('loginModal').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
         }
         
-        // Otomatik giriş kontrolü
         function checkAutoLogin() {
             const savedAuth = localStorage.getItem('kitap_auth');
             if(savedAuth === 'true') {
@@ -384,36 +387,63 @@
             });
         }
         
-        // ============ BULUT İŞLEMLERİ ============
         async function loadFromCloud() {
+            if(APPS_SCRIPT_URL === 'YENI_URL_BURAYA') {
+                showSync('⚠️ Lütfen Apps Script URL\'sini ayarlayın! Demo veri gösteriliyor', 'error');
+                books = [...DEMO_BOOKS];
+                updateUI();
+                return;
+            }
+            
             showSync('🔄 Buluttan kitaplar çekiliyor...', 'sync');
             
             try {
-                const response = await fetch(APPS_SCRIPT_URL);
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if(!response.ok) throw new Error('HTTP ' + response.status);
+                
                 const data = await response.json();
-                books = data.books || [];
+                
+                if(data.success && data.books) {
+                    books = data.books;
+                    showSync(`✅ Senkronize edildi (${books.length} kitap)`, 'success');
+                } else {
+                    throw new Error(data.error || 'Bilinmeyen hata');
+                }
+                
                 updateUI();
-                showSync(`✅ Senkronize edildi (${books.length} kitap)`, 'success');
+                
             } catch(error) {
                 console.error('Hata:', error);
-                showSync('❌ Buluta bağlanılamadı! Yerel yedek gösteriliyor', 'error');
-                // Fallback: localStorage
+                showSync(`❌ Buluta bağlanılamadı: ${error.message}. Demo veri gösteriliyor`, 'error');
+                // Fallback: localStorage veya demo
                 const saved = localStorage.getItem('books_backup');
-                if(saved) {
+                if(saved && saved !== 'undefined') {
                     books = JSON.parse(saved);
-                    updateUI();
+                } else {
+                    books = [...DEMO_BOOKS];
                 }
+                updateUI();
             }
         }
         
         async function saveToCloud(bookList) {
+            if(APPS_SCRIPT_URL === 'YENI_URL_BURAYA') {
+                showSync('⚠️ Apps Script URL ayarlı değil, sadece yerel kaydedildi', 'error');
+                localStorage.setItem('books_backup', JSON.stringify(bookList));
+                updateUI();
+                return;
+            }
+            
             showSync('💾 Buluta kaydediliyor...', 'sync');
             
             try {
-                // Apps Script'e POST isteği
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -424,22 +454,24 @@
                     })
                 });
                 
-                // Local backup
-                localStorage.setItem('books_backup', JSON.stringify(bookList));
+                const data = await response.json();
                 
-                showSync('✅ Buluta kaydedildi!', 'success');
-                
-                // 1 saniye sonra tekrar çek
-                setTimeout(() => loadFromCloud(), 1000);
+                if(data.success) {
+                    localStorage.setItem('books_backup', JSON.stringify(bookList));
+                    showSync(`✅ ${data.message}`, 'success');
+                    setTimeout(() => loadFromCloud(), 1000);
+                } else {
+                    throw new Error(data.error);
+                }
                 
             } catch(error) {
                 console.error('Save error:', error);
-                showSync('⚠️ Yerel olarak kaydedildi (bulut bağlantısı yok)', 'error');
+                showSync(`⚠️ Yerel olarak kaydedildi: ${error.message}`, 'error');
+                localStorage.setItem('books_backup', JSON.stringify(bookList));
                 updateUI();
             }
         }
         
-        // ============ KİTAP YÖNETİMİ ============
         async function addSingleBook() {
             if(!isLoggedIn) {
                 alert('🔐 Kitap eklemek için giriş yapmalısınız!');
@@ -454,7 +486,6 @@
                 return;
             }
             
-            // Aynı kitap var mı kontrol et
             if(books.find(b => b.toLowerCase() === bookName.toLowerCase())) {
                 alert('⚠️ Bu kitap zaten listenizde var!');
                 return;
@@ -496,16 +527,7 @@
                 return;
             }
             
-            books = [
-                '1984 - George Orwell',
-                'Suç ve Ceza - Dostoyevski',
-                'Don Kişot - Cervantes',
-                'Kürk Mantolu Madonna - Sabahattin Ali',
-                'Sapiens - Yuval Noah Harari',
-                'Hayvan Çiftliği - George Orwell',
-                'Satranç - Stefan Zweig',
-                'Dönüşüm - Franz Kafka'
-            ];
+            books = [...DEMO_BOOKS];
             saveToCloud(books);
         }
         
@@ -515,22 +537,16 @@
                 return;
             }
             
-            if(confirm('🔥 TÜM KİTAPLARI silmek istediğinize EMİN misiniz? Bu işlem geri alınamaz!')) {
+            if(confirm('🔥 TÜM KİTAPLARI silmek istediğinize EMİN misiniz?')) {
                 books = [];
                 await saveToCloud(books);
-                showSync('🗑️ Tüm kitaplar silindi', 'success');
             }
         }
         
-        // ============ ARAYÜZ GÜNCELLEME ============
         function updateUI() {
-            // Textarea'yı güncelle
             document.getElementById('bookList').value = books.join('\n');
-            
-            // Sayacı güncelle
             document.getElementById('bookCount').innerText = books.length;
             
-            // Liste görünümünü güncelle
             const booksListDiv = document.getElementById('booksList');
             if(books.length === 0) {
                 booksListDiv.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">📭 Henüz kitap eklenmemiş</p>';
@@ -554,7 +570,6 @@
                 return;
             }
             
-            // Tam eşleşme öncelikli
             const exactMatch = books.find(book => book.toLowerCase() === query);
             const partialMatch = books.find(book => book.toLowerCase().includes(query));
             const found = exactMatch || partialMatch;
@@ -578,18 +593,10 @@
             const statusDiv = document.getElementById('syncStatus');
             statusDiv.innerHTML = msg;
             statusDiv.className = `sync-status ${type}`;
-            
-            if(type !== 'sync') {
-                setTimeout(() => {
-                    if(document.getElementById('syncStatus').innerHTML === msg) {
-                        statusDiv.className = 'sync-status success';
-                        statusDiv.innerHTML = '✅ Hazır';
-                    }
-                }, 3000);
-            }
         }
         
         function escapeHtml(str) {
+            if(!str) return '';
             return str.replace(/[&<>]/g, function(m) {
                 if(m === '&') return '&amp;';
                 if(m === '<') return '&lt;';
@@ -598,7 +605,6 @@
             });
         }
         
-        // Sayfa yüklendiğinde
         window.onload = function() {
             checkAutoLogin();
         };
