@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitap Sorgulama</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🔐 Kardo'nun Kitaplığı</title>
     <style>
         * {
             margin: 0;
@@ -12,195 +12,536 @@
         }
         
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
+        }
+        
+        /* Login Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 24px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        
+        .card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         h1 {
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
         }
         
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
+        .badge {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #495057;
         }
         
         .search-box {
-            margin-bottom: 30px;
+            margin: 20px 0;
         }
         
-        input {
+        .search-box input {
             width: 100%;
-            padding: 15px;
-            font-size: 16px;
+            padding: 16px;
+            font-size: 18px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 12px;
+            background: #f8f9fa;
             transition: all 0.3s;
         }
         
-        input:focus {
+        .search-box input:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
         }
         
         .result {
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
-            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin: 20px 0;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .result.var {
             background: #d4edda;
             color: #155724;
-            border: 2px solid #c3e6cb;
+            border-left: 4px solid #28a745;
         }
         
         .result.yok {
             background: #f8d7da;
             color: #721c24;
-            border: 2px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
         }
         
-        .book-list {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+        .stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
         }
         
-        .book-item {
-            background: #f8f9fa;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            font-size: 14px;
+        .stats-number {
+            font-size: 48px;
+            font-weight: bold;
         }
         
-        .textarea-section {
-            margin: 20px 0;
+        .add-book {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
         
-        textarea {
-            width: 100%;
-            padding: 10px;
+        .add-book input {
+            flex: 1;
+            padding: 12px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: monospace;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 16px;
         }
         
         button {
             background: #667eea;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
-            margin: 5px;
-            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.1s;
         }
         
-        button:hover {
-            background: #5a67d8;
+        button:active {
+            transform: scale(0.98);
         }
         
-        .stats {
-            background: #e9ecef;
-            padding: 10px;
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        .book-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
             border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.2s ease;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .sync-status {
+            font-size: 12px;
             text-align: center;
-            margin-bottom: 20px;
+            padding: 8px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .sync-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .sync-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .sync-status.sync {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .admin-only {
+            border-top: 2px solid #e0e0e0;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        
+        .lock-icon {
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        
+        .quick-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📚 Kitap Sorgulama</h1>
-        <div class="subtitle">Kitap adını yaz, bende var mı hemen öğren!</div>
-        
-        <div class="stats" id="stats">
-            Yükleniyor...
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <h2>🔐 Giriş Yap</h2>
+                <p style="color:#666; margin:10px 0">Bu uygulama özeldir</p>
+                <input type="text" id="username" placeholder="Kullanıcı Adı" autocomplete="off">
+                <input type="password" id="password" placeholder="Şifre">
+                <button onclick="login()" style="width:100%; margin-top:10px">Giriş Yap</button>
+                <p style="margin-top:15px; font-size:12px; color:#999">🔍 Sorgulama herkese açık</p>
+            </div>
         </div>
         
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Kitap adını yaz..." autocomplete="off">
+        <!-- Ana Uygulama -->
+        <div id="mainApp" style="display:none;">
+            <div class="card">
+                <div class="header">
+                    <h1>📚 Kardo'nun Kitaplığı</h1>
+                    <span class="lock-icon" onclick="logout()" title="Çıkış Yap">🔓</span>
+                </div>
+                <div class="badge">☁️ Bulut Senkronizasyonlu | 🔐 Korumalı</div>
+            </div>
+            
+            <div class="stats">
+                <div class="stats-number" id="bookCount">0</div>
+                <div>kitabınız var</div>
+            </div>
+            
+            <div class="card">
+                <h3>🔍 Kitap Sorgula</h3>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Kitap adını yaz, hemen öğren..." autocomplete="off">
+                </div>
+                <div id="result" class="result"></div>
+            </div>
+            
+            <div class="card" id="adminPanel">
+                <h3>➕ Yeni Kitap Ekle</h3>
+                <div class="add-book">
+                    <input type="text" id="newBook" placeholder="Kitap adı..." autocomplete="off">
+                    <button onclick="addSingleBook()">Ekle</button>
+                </div>
+                
+                <div class="admin-only">
+                    <h3>📝 Toplu Yönetim</h3>
+                    <textarea id="bookList" rows="6" placeholder="Her satıra bir kitap adı..."></textarea>
+                    <button onclick="saveAllBooks()" class="success">💾 Tümünü Kaydet</button>
+                    <button onclick="loadFromCloud()">🔄 Yenile</button>
+                    
+                    <div class="quick-buttons">
+                        <button onclick="addExample()" class="secondary">📖 Örnek Kitaplar</button>
+                        <button onclick="clearAll()" class="danger">🗑️ Tümünü Temizle</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📖 Kitaplarım ({{bookCount}})</h3>
+                <div id="booksList"></div>
+            </div>
+            
+            <div id="syncStatus" class="sync-status success">✅ Hazır</div>
         </div>
-        
-        <div id="result" class="result"></div>
-        
-        <div class="textarea-section">
-            <h3>📖 Kitaplarım (her satıra bir kitap adı)</h3>
-            <textarea id="bookList" rows="10" placeholder="Örneğin:
-1984 - George Orwell
-Suc ve Ceza
-Don Kişot
-Kürk Mantolu Madonna"></textarea>
-            <button onclick="saveBooks()">💾 Kitapları Kaydet</button>
-            <button onclick="loadExample()">📝 Örnek Yükle</button>
-        </div>
-        
-        <div class="book-list" id="bookListDisplay"></div>
     </div>
 
     <script>
+        // ============ KONFIGÜRASYON ============
+        const SHEETS_ID = '1IqVH9oXoaUmQ5i4k1mfhrD6c2D24lxwoIlE5PsrKTyI';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxk8uPZnrHvrQevqDNvUE_TkojFIGBUGqMKXXey_dHMlvXp7Yxxr-tESnX59SKJd9opBw/exec';
+        
+        // Şifre bilgileri
+        const VALID_USERNAME = 'Kardo';
+        const VALID_PASSWORD = '616161';
+        
+        // ============ GLOBAL DEĞİŞKENLER ============
         let books = [];
+        let isLoggedIn = false;
         
-        // Sayfa yüklenince kayıtlı kitapları getir
-        window.onload = function() {
-            loadBooks();
-            document.getElementById('searchInput').addEventListener('input', searchBook);
-        };
-        
-        function loadBooks() {
-            const saved = localStorage.getItem('myBooks');
-            if(saved) {
-                books = JSON.parse(saved);
-                document.getElementById('bookList').value = books.join('\n');
-            } else {
-                // Örnek kitaplar
-                books = ['1984 - George Orwell', 'Suç ve Ceza', 'Don Kişot', 'Kürk Mantolu Madonna'];
-                document.getElementById('bookList').value = books.join('\n');
-            }
-            updateDisplay();
-        }
-        
-        function saveBooks() {
-            const text = document.getElementById('bookList').value;
-            books = text.split('\n').filter(line => line.trim().length > 0);
-            localStorage.setItem('myBooks', JSON.stringify(books));
-            updateDisplay();
-            showMessage('✅ Kitaplar kaydedildi!', 'success');
-        }
-        
-        function loadExample() {
-            books = ['1984 - George Orwell', 'Suç ve Ceza', 'Don Kişot', 'Kürk Mantolu Madonna', 'Sapiens', 'Hayvan Çiftliği'];
-            document.getElementById('bookList').value = books.join('\n');
-            saveBooks();
-        }
-        
-        function updateDisplay() {
-            const display = document.getElementById('bookListDisplay');
-            display.innerHTML = '<h3>📚 Sahip olduğum kitaplar (' + books.length + ' kitap)</h3>';
-            books.forEach(book => {
-                display.innerHTML += '<div class="book-item">📖 ' + book + '</div>';
-            });
+        // ============ GİRİŞ KONTROLÜ ============
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             
-            document.getElementById('stats').innerHTML = `📊 Toplam ${books.length} kitabınız var`;
+            if(username === VALID_USERNAME && password === VALID_PASSWORD) {
+                isLoggedIn = true;
+                localStorage.setItem('kitap_auth', 'true');
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadFromCloud();
+                setupEventListeners();
+            } else {
+                alert('❌ Hatalı kullanıcı adı veya şifre!');
+            }
+        }
+        
+        function logout() {
+            isLoggedIn = false;
+            localStorage.removeItem('kitap_auth');
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        // Otomatik giriş kontrolü
+        function checkAutoLogin() {
+            const savedAuth = localStorage.getItem('kitap_auth');
+            if(savedAuth === 'true') {
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadFromCloud();
+                setupEventListeners();
+            }
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', searchBook);
+            document.getElementById('newBook').addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') addSingleBook();
+            });
+        }
+        
+        // ============ BULUT İŞLEMLERİ ============
+        async function loadFromCloud() {
+            showSync('🔄 Buluttan kitaplar çekiliyor...', 'sync');
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.json();
+                books = data.books || [];
+                updateUI();
+                showSync(`✅ Senkronize edildi (${books.length} kitap)`, 'success');
+            } catch(error) {
+                console.error('Hata:', error);
+                showSync('❌ Buluta bağlanılamadı! Yerel yedek gösteriliyor', 'error');
+                // Fallback: localStorage
+                const saved = localStorage.getItem('books_backup');
+                if(saved) {
+                    books = JSON.parse(saved);
+                    updateUI();
+                }
+            }
+        }
+        
+        async function saveToCloud(bookList) {
+            showSync('💾 Buluta kaydediliyor...', 'sync');
+            
+            try {
+                // Apps Script'e POST isteği
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        books: bookList,
+                        username: VALID_USERNAME,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                // Local backup
+                localStorage.setItem('books_backup', JSON.stringify(bookList));
+                
+                showSync('✅ Buluta kaydedildi!', 'success');
+                
+                // 1 saniye sonra tekrar çek
+                setTimeout(() => loadFromCloud(), 1000);
+                
+            } catch(error) {
+                console.error('Save error:', error);
+                showSync('⚠️ Yerel olarak kaydedildi (bulut bağlantısı yok)', 'error');
+                updateUI();
+            }
+        }
+        
+        // ============ KİTAP YÖNETİMİ ============
+        async function addSingleBook() {
+            if(!isLoggedIn) {
+                alert('🔐 Kitap eklemek için giriş yapmalısınız!');
+                return;
+            }
+            
+            const input = document.getElementById('newBook');
+            const bookName = input.value.trim();
+            
+            if(!bookName) {
+                alert('Lütfen bir kitap adı girin!');
+                return;
+            }
+            
+            // Aynı kitap var mı kontrol et
+            if(books.find(b => b.toLowerCase() === bookName.toLowerCase())) {
+                alert('⚠️ Bu kitap zaten listenizde var!');
+                return;
+            }
+            
+            books.push(bookName);
+            await saveToCloud(books);
+            input.value = '';
+            input.focus();
+        }
+        
+        async function deleteBook(index) {
+            if(!isLoggedIn) {
+                alert('🔐 Kitap silmek için giriş yapmalısınız!');
+                return;
+            }
+            
+            if(confirm(`${books[index]} kitabını silmek istediğinize emin misiniz?`)) {
+                books.splice(index, 1);
+                await saveToCloud(books);
+            }
+        }
+        
+        async function saveAllBooks() {
+            if(!isLoggedIn) {
+                alert('🔐 Bu işlem için giriş yapmalısınız!');
+                return;
+            }
+            
+            const text = document.getElementById('bookList').value;
+            const newBooks = text.split('\n').filter(line => line.trim().length > 0);
+            books = newBooks;
+            await saveToCloud(books);
+        }
+        
+        function addExample() {
+            if(!isLoggedIn) {
+                alert('🔐 Bu işlem için giriş yapmalısınız!');
+                return;
+            }
+            
+            books = [
+                '1984 - George Orwell',
+                'Suç ve Ceza - Dostoyevski',
+                'Don Kişot - Cervantes',
+                'Kürk Mantolu Madonna - Sabahattin Ali',
+                'Sapiens - Yuval Noah Harari',
+                'Hayvan Çiftliği - George Orwell',
+                'Satranç - Stefan Zweig',
+                'Dönüşüm - Franz Kafka'
+            ];
+            saveToCloud(books);
+        }
+        
+        async function clearAll() {
+            if(!isLoggedIn) {
+                alert('🔐 Bu işlem için giriş yapmalısınız!');
+                return;
+            }
+            
+            if(confirm('🔥 TÜM KİTAPLARI silmek istediğinize EMİN misiniz? Bu işlem geri alınamaz!')) {
+                books = [];
+                await saveToCloud(books);
+                showSync('🗑️ Tüm kitaplar silindi', 'success');
+            }
+        }
+        
+        // ============ ARAYÜZ GÜNCELLEME ============
+        function updateUI() {
+            // Textarea'yı güncelle
+            document.getElementById('bookList').value = books.join('\n');
+            
+            // Sayacı güncelle
+            document.getElementById('bookCount').innerText = books.length;
+            
+            // Liste görünümünü güncelle
+            const booksListDiv = document.getElementById('booksList');
+            if(books.length === 0) {
+                booksListDiv.innerHTML = '<p style="color:#999; text-align:center; padding:20px;">📭 Henüz kitap eklenmemiş</p>';
+            } else {
+                booksListDiv.innerHTML = books.map((book, index) => `
+                    <div class="book-item">
+                        <span>📖 ${escapeHtml(book)}</span>
+                        ${isLoggedIn ? `<button class="delete-btn" onclick="deleteBook(${index})">🗑️ Sil</button>` : ''}
+                    </div>
+                `).join('');
+            }
         }
         
         function searchBook() {
@@ -213,28 +554,54 @@ Kürk Mantolu Madonna"></textarea>
                 return;
             }
             
-            // Tam eşleşme ve kısmi eşleşme kontrolü
-            const found = books.find(book => book.toLowerCase().includes(query));
+            // Tam eşleşme öncelikli
+            const exactMatch = books.find(book => book.toLowerCase() === query);
+            const partialMatch = books.find(book => book.toLowerCase().includes(query));
+            const found = exactMatch || partialMatch;
             
             if(found) {
-                resultDiv.innerHTML = `✅ " ${query} " Bende VAR! (${found})`;
+                resultDiv.innerHTML = `
+                    <div>✅ <strong>"${escapeHtml(query)}"</strong> bende VAR!</div>
+                    <small style="opacity:0.8;">📖 ${escapeHtml(found)}</small>
+                `;
                 resultDiv.className = 'result var';
             } else {
-                resultDiv.innerHTML = `❌ " ${query} " Bende YOK!`;
+                resultDiv.innerHTML = `
+                    <div>❌ <strong>"${escapeHtml(query)}"</strong> bende YOK!</div>
+                    <small style="opacity:0.8;">📚 Kitapçıya sorman gerek 😊</small>
+                `;
                 resultDiv.className = 'result yok';
             }
         }
         
-        function showMessage(msg, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = msg;
-            resultDiv.className = type === 'success' ? 'result var' : 'result yok';
-            setTimeout(() => {
-                if(document.getElementById('searchInput').value === '') {
-                    resultDiv.innerHTML = '';
-                }
-            }, 2000);
+        function showSync(msg, type) {
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = msg;
+            statusDiv.className = `sync-status ${type}`;
+            
+            if(type !== 'sync') {
+                setTimeout(() => {
+                    if(document.getElementById('syncStatus').innerHTML === msg) {
+                        statusDiv.className = 'sync-status success';
+                        statusDiv.innerHTML = '✅ Hazır';
+                    }
+                }, 3000);
+            }
         }
+        
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            checkAutoLogin();
+        };
     </script>
 </body>
 </html>
