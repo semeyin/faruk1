@@ -255,14 +255,6 @@
             flex-wrap: wrap;
             margin-top: 10px;
         }
-        
-        .test-mode {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
@@ -330,22 +322,14 @@
     </div>
 
     <script>
-        // ============ 🔴 BURAYA YENİ APPS SCRIPT URL'NİZİ YAPIŞTIRIN ============
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT_qoYm_nget_-nZhjGDFMvtvlRHqEjLZd4UWMqwjn3h0LOGzhSrOwciNEjv5fzsO_RA/exec'; // Deploy ettikten sonra gelen yeni URL
+        // 🔴 BURAYA YENİ APPS SCRIPT URL'NİZİ YAPIŞTIRIN
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-BxuOuPhPSgU7kAThIPnKN3yhxANY2Ii42fRr5KqtwMOOgommdZ1ER025QHYi3TX6Gw/exec';
         
         const VALID_USERNAME = 'Kardo';
         const VALID_PASSWORD = '616161';
         
         let books = [];
         let isLoggedIn = false;
-        
-        // Test için demo veri (bulut çalışmazsa)
-        const DEMO_BOOKS = [
-            '1984 - George Orwell',
-            'Suç ve Ceza - Dostoyevski',
-            'Don Kişot - Cervantes',
-            'Kürk Mantolu Madonna - Sabahattin Ali'
-        ];
         
         function login() {
             const username = document.getElementById('username').value;
@@ -388,85 +372,64 @@
         }
         
         async function loadFromCloud() {
-            if(APPS_SCRIPT_URL === 'YENI_URL_BURAYA') {
-                showSync('⚠️ Lütfen Apps Script URL\'sini ayarlayın! Demo veri gösteriliyor', 'error');
-                books = [...DEMO_BOOKS];
-                updateUI();
-                return;
-            }
-            
             showSync('🔄 Buluttan kitaplar çekiliyor...', 'sync');
             
             try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if(!response.ok) throw new Error('HTTP ' + response.status);
-                
+                const response = await fetch(APPS_SCRIPT_URL);
                 const data = await response.json();
                 
                 if(data.success && data.books) {
                     books = data.books;
-                    showSync(`✅ Senkronize edildi (${books.length} kitap)`, 'success');
+                    showSync(`✅ ${data.count} kitap senkronize edildi`, 'success');
                 } else {
-                    throw new Error(data.error || 'Bilinmeyen hata');
+                    throw new Error(data.error || 'Veri alınamadı');
                 }
                 
                 updateUI();
                 
             } catch(error) {
                 console.error('Hata:', error);
-                showSync(`❌ Buluta bağlanılamadı: ${error.message}. Demo veri gösteriliyor`, 'error');
-                // Fallback: localStorage veya demo
+                showSync(`❌ Bulut bağlantı hatası: ${error.message}`, 'error');
+                
+                // Yedekten yükle
                 const saved = localStorage.getItem('books_backup');
                 if(saved && saved !== 'undefined') {
                     books = JSON.parse(saved);
+                    showSync('⚠️ Yerel yedekten yüklendi', 'error');
                 } else {
-                    books = [...DEMO_BOOKS];
+                    books = ['1984 - George Orwell', 'Suç ve Ceza', 'Don Kişot', 'Kürk Mantolu Madonna'];
+                    showSync('📱 Demo mod - Kitaplar yerel olarak kaydedilecek', 'error');
                 }
                 updateUI();
             }
         }
         
         async function saveToCloud(bookList) {
-            if(APPS_SCRIPT_URL === 'YENI_URL_BURAYA') {
-                showSync('⚠️ Apps Script URL ayarlı değil, sadece yerel kaydedildi', 'error');
-                localStorage.setItem('books_backup', JSON.stringify(bookList));
-                updateUI();
-                return;
-            }
-            
             showSync('💾 Buluta kaydediliyor...', 'sync');
             
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
+                    mode: 'no-cors', // Apps Script için no-cors gerekli
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ 
                         books: bookList,
-                        username: VALID_USERNAME,
-                        timestamp: new Date().toISOString()
+                        user: 'Kardo'
                     })
                 });
                 
-                const data = await response.json();
+                // Local backup her zaman yap
+                localStorage.setItem('books_backup', JSON.stringify(bookList));
+                showSync('✅ Yerel olarak kaydedildi', 'success');
                 
-                if(data.success) {
-                    localStorage.setItem('books_backup', JSON.stringify(bookList));
-                    showSync(`✅ ${data.message}`, 'success');
-                    setTimeout(() => loadFromCloud(), 1000);
-                } else {
-                    throw new Error(data.error);
-                }
+                // 2 saniye sonra tekrar çek
+                setTimeout(() => loadFromCloud(), 2000);
                 
             } catch(error) {
                 console.error('Save error:', error);
-                showSync(`⚠️ Yerel olarak kaydedildi: ${error.message}`, 'error');
+                showSync(`⚠️ Yerel olarak kaydedildi (bulut hatası)`, 'error');
                 localStorage.setItem('books_backup', JSON.stringify(bookList));
                 updateUI();
             }
@@ -527,7 +490,14 @@
                 return;
             }
             
-            books = [...DEMO_BOOKS];
+            books = [
+                '1984 - George Orwell',
+                'Suç ve Ceza - Dostoyevski',
+                'Don Kişot - Cervantes',
+                'Kürk Mantolu Madonna - Sabahattin Ali',
+                'Sapiens - Yuval Noah Harari',
+                'Hayvan Çiftliği - George Orwell'
+            ];
             saveToCloud(books);
         }
         
